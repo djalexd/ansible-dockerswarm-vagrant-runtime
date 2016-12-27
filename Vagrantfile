@@ -16,25 +16,23 @@ Vagrant.configure(2) do |config|
   config.vm.define "manager" do |box|
     box.vm.network "private_network", ip: "192.168.50.10"
     box.vm.hostname = "mananger"
-
-    box.vm.provision "ansible" do |ansible|
-      ansible.playbook = "play.yml"
-      ansible.galaxy_role_file = "galaxy.roles"
-      ansible.groups = groups
-      #ansible.extra_vars = {
-      #  docker_swarm_interface: "eth1"
-      #}
-    end
   end
 
   (1..workers).each do |id|
     config.vm.define "worker-#{ id }" do |box|
       box.vm.network "private_network", ip: "192.168.50.#{ 10 + id }"
       box.vm.hostname = "worker-#{ id }"
-      box.vm.provision "ansible" do |ansible|
-        ansible.playbook = "play.yml"
-        ansible.galaxy_role_file = "galaxy.roles"
-        ansible.groups = groups
+      
+      if id == workers
+        box.vm.provision "ansible" do |ansible|
+          ansible.limit = "all" # Tell Vagrant not to limit ansible to this host
+          ansible.playbook = "play.yml"
+          ansible.galaxy_role_file = "requirements.yml"
+          ansible.groups = groups
+          ansible.extra_vars = {
+            docker_swarm_interface: "eth1"
+          }
+        end
       end
     end
   end
