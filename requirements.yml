@@ -1,0 +1,4 @@
+- src: git@github.com:atosatto/ansible-dockerswarm.git 
+  scm: git
+  version: master
+  name: atosatto.docker-swarm
